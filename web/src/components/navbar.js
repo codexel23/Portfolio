@@ -1,4 +1,4 @@
-import { link } from '@redwoodjs/router'
+import { Link } from '@redwoodjs/router'
 
 const navbar = () => (
   <nav className="navbar">

@@ -1,19 +1,18 @@
 // import { Link, routes } from '@redwoodjs/router'
 import { Metadata } from '@redwoodjs/web'
+import { Link } from '@redwoodjs/router'
 
 const ProjectsPage = () => {
   return (
     <>
       <Metadata title="Projects" description="Projects page" />
 
-      <h1>ProjectsPage</h1>
-      <p>
-        Find me in <code>./web/src/pages/ProjectsPage/ProjectsPage.jsx</code>
-      </p>
-      {/*
-           My default route is named `projects`, link to me with:
-           `<Link to={routes.projects()}>Projects</Link>`
-        */}
+      <ul>
+
+       <li><Link to="/devvault">DevVault</Link></li>
+       
+      </ul>
+
     </>
   )
 }
