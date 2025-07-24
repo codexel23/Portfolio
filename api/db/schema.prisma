@@ -22,3 +22,24 @@ model UserExample {
   email String  @unique
   name  String?
 }
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  email     String?
+  createdAt DateTime @default(now())
+  projects  Project[]
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  tech        String
+  description String
+  notes       String
+  isPublic    Boolean  @default(true)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+}

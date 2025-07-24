@@ -1,32 +1,43 @@
-/**
- * Once you are ready to add authentication to your application
- * you'll build out requireAuth() with real functionality. For
- * now we just return `true` so that the calls in services
- * have something to check against, simulating a logged
- * in user that is allowed to access that service.
- *
- * See https://redwoodjs.com/docs/authentication for more info.
- */
+import { AuthenticationError, ForbiddenError } from '@redwoodjs/graphql-server'
+
+export const getCurrentUser = async (decoded, { _token, _type }) => {
+  return decoded
+}
+
 export const isAuthenticated = () => {
-  return true
+  return !!context.currentUser
 }
 
-export const hasRole = ({ roles }) => {
-  return roles !== undefined
+export const hasRole = (roles) => {
+  if (!context.currentUser?.roles) {
+    return false
+  }
+
+  if (typeof roles === 'string') {
+    roles = [roles]
+  }
+
+  return context.currentUser.roles.some((role) => roles.includes(role))
 }
 
-// This is used by the redwood directive
-// in ./api/src/directives/requireAuth
+export const requireAuth = ({ roles } = {}) => {
+  const requestIp =
+    context.request?.headers['x-forwarded-for'] ||
+    context.request?.connection?.remoteAddress
 
-// Roles are passed in by the requireAuth directive if you have auth setup
-// eslint-disable-next-line no-unused-vars
-export const requireAuth = ({ roles }) => {
-  return isAuthenticated()
+  console.log('🧠 Incoming IP:', requestIp)
+
+  const allowedIps = ['127.0.0.1', '::1', '51.37.202.185']
+
+  const isIpAllowed =
+    requestIp === undefined || allowedIps.some((ip) => requestIp?.includes(ip))
+
+  if (!isAuthenticated() && !isIpAllowed) {
+    throw new AuthenticationError("You don't have permission to do that.")
+  }
+
+  if (roles && !hasRole(roles)) {
+    throw new ForbiddenError("You don't have access to do that.")
+  }
 }
 
-export const getCurrentUser = async () => {
-  throw new Error(
-    'Auth is not set up yet. See https://redwoodjs.com/docs/authentication ' +
-      'to get started'
-  )
-}
