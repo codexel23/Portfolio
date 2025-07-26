@@ -3,17 +3,22 @@ import { useDevVaultAuth } from './DevVaultAuthContext'
 
 const LoginForm = () => {
   const { logIn } = useDevVaultAuth()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await logIn(email, password)
+      await logIn(username, password)
       setError(null)
+      setSuccess(true)
+      setTimeout(() => {
+      window.location.href = '/devvault'
+    }, 1500)
     } catch (err) {
-      setError('Login failed — check email or password')
+      setError('Login failed — check username or password')
     }
   }
 
@@ -21,10 +26,10 @@ const LoginForm = () => {
     <form onSubmit={handleSubmit} className="login-form">
       <h2>DevVault Login</h2>
       <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         required
       />
       <input
@@ -35,9 +40,10 @@ const LoginForm = () => {
         required
       />
       <button type="submit">Log In</button>
+      {success && <p className="success">✅ Login successful! Redirecting...</p>}
       {error && <p className="error">{error}</p>}
 
-      <style jsx>{`
+      <style>{`
         .login-form {
           width: 100%;
           max-width: 400px;
@@ -93,6 +99,18 @@ const LoginForm = () => {
           color: #ff6b6b;
           text-align: center;
           margin-top: 1rem;
+        }
+
+        .success {
+          color: #00ffaa;
+          text-align: center;
+          margin-top: 1rem;
+          animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0 }
+          to { opacity: 1 }
         }
       `}</style>
     </form>

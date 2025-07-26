@@ -8,10 +8,11 @@ export const DevVaultAuthProvider = ({ children }) => {
     return stored ? JSON.parse(stored) : null
   })
 
-  const logIn = async (email, password) => {
+  const logIn = async (username, password) => {
     const res = await fetch('/.redwood/functions/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
     })
     if (res.ok) {
       const user = await res.json()
@@ -22,10 +23,10 @@ export const DevVaultAuthProvider = ({ children }) => {
     }
   }
 
-  const signUp = async (email, password) => {
+  const signUp = async (username, password) => {
     const res = await fetch('/.redwood/functions/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     })
     if (res.ok) {
       const user = await res.json()
