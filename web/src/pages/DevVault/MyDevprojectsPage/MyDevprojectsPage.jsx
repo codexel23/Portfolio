@@ -27,15 +27,22 @@ useEffect(() => {
 }, [projects])
 
   useEffect(() => {
-  setProjects((prev) =>
-    prev.filter((proj, index, arr) => {
+  setProjects((prev) => {
+    const filtered = prev.filter((proj, index, arr) => {
       const isLast = index === arr.length - 1
       const hasContent = proj.title || proj.tech || proj.description || proj.notes
       const shouldKeep = hasContent || proj.isOpen || isLast
       return shouldKeep
     })
-  )
-}, [projects])
+
+    if (filtered.length !== prev.length) {
+      return filtered
+    }
+
+    return prev
+  })
+}, [])
+
 
   useEffect(() => {
     const lastProject = projects[projects.length - 1]
@@ -85,14 +92,27 @@ useEffect(() => {
     const project = projects[index]
     const prompt = `Project Title: ${project.title}\nTech Stack: ${project.tech}\nDescription: ${project.description}\nNotes: ${project.notes}\nThis project is ${project.isPublic ? 'public' : 'private'}.\n\nBased on this, provide feedback, suggestions, or possible directions for development.`
 
-    const res = await fetch('/.redwood/functions/askAi', {
+    const isDev = window.location.hostname === 'localhost'
+    const endpoint = isDev
+      ? '/.redwood/functions/askAi'
+      : '/api/askAi'
+
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt }),
     })
 
-    const data = await res.json()
-    const output = data.output || ''
+
+    let output = ''
+    try {
+      const data = await res.json()
+      output = data.output || ''
+    } catch (err) {
+      console.error('Failed to parse AI response', err)
+      output = '⚠️ AI did not respond properly. Check logs.'
+    }
+
 
     if (typingIntervalRef.current) clearInterval(typingIntervalRef.current)
 
