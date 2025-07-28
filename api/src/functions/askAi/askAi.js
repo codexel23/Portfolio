@@ -1,8 +1,18 @@
+import fetch from 'node-fetch'
+
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method Not Allowed' }),
+    }
+  }
+
+  if (!process.env.GROQ_API_KEY) {
+    console.error('Missing GROQ_API_KEY')
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Missing GROQ_API_KEY in env' }),
     }
   }
 
@@ -24,7 +34,15 @@ export const handler = async (event) => {
       }),
     })
 
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Groq API error:', response.status, errorText)
+      throw new Error(`Groq API error: ${response.status}`)
+    }
+
+
     const data = await response.json()
+
     const aiMessage = data.choices?.[0]?.message?.content || 'No response received.'
 
     return {
@@ -35,7 +53,7 @@ export const handler = async (event) => {
     console.error('AI Function Error:', err)
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
+      body: JSON.stringify({ error: err.message || 'Internal Server Error' }),
     }
   }
 }
